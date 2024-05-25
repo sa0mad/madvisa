@@ -6,6 +6,7 @@
 #include "tb.h"
 
 // Module include
+#define MADVISA
 #include "visa.h"
 #include "visa_internals.h"
 
@@ -28,6 +29,8 @@ int main()
 	ViKeyId		access_key = NULL;
 	ViKeyId		requested_key = NULL;
 	int		i;
+	ViUInt16	excl_count0, excl_count1;
+	ViUInt16	shrd_count0, shrd_count1;
 
 	TB_VAR_RESET(visa);
 
@@ -169,9 +172,16 @@ int main()
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_ERROR_INV_SESSION, "VISA 3.6.3 VI_ERROR_INV_SESSION");
 	retval = viLock(vi,5,0,VI_NULL,access_key);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_ERROR_INV_LOCK_TYPE, "VISA 3.6.3 VI_ERROR_INV_SESSION");
+	// Rule 3.6.9
+	retval = viGetAttribute(vi,VI_ATTR_RSRC_EXCL_LOCK_COUNT,&excl_count0);
+	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
 	// Rule 3.6.13
 	retval = viLock(vi,VI_EXCLUSIVE_LOCK,0,VI_NULL,VI_NULL);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA 3.6.13 VI_SUCCESS");
+	// Rule 3.6.10
+	retval = viGetAttribute(vi,VI_ATTR_RSRC_EXCL_LOCK_COUNT,&excl_count1);
+	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
+	TB_TEST_EXPECT_M_UINT(visa, excl_count1, excl_count0+1, "VISA 3.6.10");
 	// Rule 3.6.14
 	access_key = (char *)malloc(sizeof(char)*512);
 	access_key[0] = 'f';
@@ -189,8 +199,15 @@ int main()
 	retval = viLock(vi,VI_SHARED_LOCK,0,requested_key,access_key);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_ERROR_INV_ACCESS_KEY, "VISA 3.6.17 VI_ERROR_INV_ACCESS_KEY");
 	requested_key[255] = 0;
+	// Rule 3.6.9
+	retval = viGetAttribute(vi,VI_ATTR_RSRC_SHRD_LOCK_COUNT,&shrd_count0);
+	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
 	retval = viLock(vi,VI_SHARED_LOCK,0,requested_key,access_key);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA 3.6.17 VI_SUCCESS");
+	// Rule 3.6.11
+	retval = viGetAttribute(vi,VI_ATTR_RSRC_SHRD_LOCK_COUNT,&shrd_count1);
+	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
+	TB_TEST_EXPECT_M_UINT(visa, shrd_count1, shrd_count0+1, "VISA 3.6.10");
 	// Rule 3.6.18
 	for (i = 0; i < 256; i++)
 		if (access_key[i] != requested_key[i])
@@ -203,7 +220,9 @@ int main()
 	retval = viUnlock(0);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_ERROR_INV_SESSION, "VISA 3.6.3 VI_ERROR_INV_SESSION");
 
+	// Rule 3.6.10
 
+	
 	// Rules not testable
 	// Rule 3.2.4
 	// Rule 3.3.1
@@ -212,7 +231,6 @@ int main()
 
 	// Indirectly testable
 	// Rule 3.2.11
-	// Rule 3.6.9
 
 	// Remaining rules to implement
 	// Rule 3.2.5
@@ -220,15 +238,7 @@ int main()
 	// Rule 3.4.1
 	// Rule 3.4.1-a
 	// Rule 3.4.1-b
-	// Rule 3.6.2
-	// Rule 3.6.3
-	// Rule 3.6.4
-	// Rule 3.6.5
-	// Rule 3.6.6
-	// Rule 3.6.7
 	// Rule 3.6.8
-	// Rule 3.6.10
-	// Rule 3.6.11
 	// Rule 3.6.12
 	// Rule 3.6.15
 	// Rule 3.6.16
@@ -253,6 +263,12 @@ int main()
 	// Rule 3.6.37
 	// Rule 3.6.38
 	// Rule 3.6.39
+
+	// Awaits HiSLIP
+	// Rule 3.6.4
+	// Rule 3.6.5
+	// Rule 3.6.6
+	// Rule 3.6.7
 	
 	// Clean up
 	retval = viClose(vi);

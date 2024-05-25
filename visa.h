@@ -593,6 +593,13 @@ ViStatus viPxiReserveTriggers	(ViSession vi, ViInt16 cnt, ViAInt16 trigBuses,
 #define VI_ATTR_PXI_MEM_SIZE_BAR5_64	((ViAttr)0x3FFF023DL)
 #define VI_ATTR_PXI_ALLOW_WRITE_COMBINE		((ViAttr)0x3FFF0246L)
 
+// Unique definitions
+// Respect VPP432 rule 3.8.9
+#ifdef MADVISA
+#define VI_ATTR_RSRC_SHRD_LOCK_COUNT	((ViAttr)0x3FFF9000L)
+#define VI_ATTR_RSRC_EXCL_LOCK_COUNT	((ViAttr)0x3FFF9001L)
+#endif
+
 // 3.5 Event Type Values
 // Table 3.5.1
 

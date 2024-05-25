@@ -4,6 +4,7 @@
 #include <string.h>
 
 // Module includes
+#define MADVISA
 #include "visa.h"
 #include "visa_internals.h"
 
@@ -685,6 +686,18 @@ ViStatus viGetAttribute(ViObject vi, ViAttr attrName, void _VI_PTR attrValue)
 		return VI_SUCCESS;
 	}
 
+	// MADVISA internal
+	if (attrName == VI_ATTR_RSRC_SHRD_LOCK_COUNT)
+	{
+		retval = vi_rsrc_get_shared_lock_count(vip->rsrc, (ViUInt16 *)attrValue);
+		return retval;
+	}
+	if (attrName == VI_ATTR_RSRC_EXCL_LOCK_COUNT)
+	{
+		retval = vi_rsrc_get_excl_lock_count(vip->rsrc, (ViUInt16 *)attrValue);
+		return retval;
+	}
+
 	// VI_ATTR_TCPIP_SERVER_CERT_SIZE logic
 	if (attrName == VI_ATTR_TCPIP_SERVER_CERT_SIZE)
 		vip->vi_attr_tcpip_server_cert_size_get_status = 1;
@@ -791,6 +804,18 @@ ViStatus viLock(ViObject vi, ViAccessMode lock_type, ViUInt32 timeout, ViConstKe
 		return VI_ERROR_INV_ACCESS_KEY;
 	if ((lock_type == VI_SHARED_LOCK) && (requested_key != NULL) && (is_locked == 0))
 		strncpy(access_key,requested_key,255);
+	if (lock_type == VI_EXCLUSIVE_LOCK)
+	{
+		retval = vi_rsrc_inc_excl_lock_count(vip->rsrc);
+		if (retval != VI_SUCCESS)
+			return retval;
+	}
+	if (lock_type == VI_SHARED_LOCK)
+	{
+		retval = vi_rsrc_inc_shared_lock_count(vip->rsrc);
+		if (retval != VI_SUCCESS)
+			return retval;
+	}
 	return VI_SUCCESS;
 }
 
