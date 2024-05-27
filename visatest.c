@@ -240,6 +240,15 @@ int main()
 		if (access_key[i] != requested_key[i])
 			break;
 	TB_TEST_EXPECT_M_INT(visa, i, 256, "VISA 3.6.18");
+	// Rule 3.6.30
+	retval = viGetAttribute(vi,VI_ATTR_RSRC_SHRD_LOCK_COUNT,&shrd_count0);
+	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
+	retval = viLock(vi,VI_SHARED_LOCK,0,requested_key,access_key);
+	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS_NESTED_SHARED, "VISA 3.6.30 VI_SUCCESS_NESTED_SHARED");
+	// Rule 3.6.11
+	retval = viGetAttribute(vi,VI_ATTR_RSRC_SHRD_LOCK_COUNT,&shrd_count1);
+	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
+	TB_TEST_EXPECT_M_UINT(visa, shrd_count1, shrd_count0+1, "VISA 3.6.10");
 
 	free(access_key);
 	free(requested_key);
@@ -281,7 +290,6 @@ int main()
 	// Rule 3.6.25
 	// Rule 3.6.26
 	// Rule 3.6.29
-	// Rule 3.6.30
 	// Rule 3.6.31
 
 	// Rule 3.6.33

@@ -820,6 +820,8 @@ ViStatus viLock(ViObject vi, ViAccessMode lock_type, ViUInt32 timeout, ViConstKe
 		retval = vi_rsrc_inc_shared_lock_count(vip->rsrc);
 		if (retval != VI_SUCCESS)
 			return retval;
+		if (shared_lock_count > 0)
+			return VI_SUCCESS_NESTED_SHARED;
 	}
 	return VI_SUCCESS;
 }
