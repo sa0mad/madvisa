@@ -212,7 +212,7 @@ int main()
 	retval = viGetAttribute(vi,VI_ATTR_RSRC_EXCL_LOCK_COUNT,&excl_count0);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
 	retval = viUnlock(vi);
-	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS_NESTED_EXCLUSIVE, "VISA");
+	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA");
 	retval = viGetAttribute(vi,VI_ATTR_RSRC_EXCL_LOCK_COUNT,&excl_count1);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
 	TB_TEST_EXPECT_M_UINT(visa, excl_count1, excl_count0-1, "VISA 3.6.35");
@@ -249,6 +249,9 @@ int main()
 	retval = viGetAttribute(vi,VI_ATTR_RSRC_SHRD_LOCK_COUNT,&shrd_count1);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
 	TB_TEST_EXPECT_M_UINT(visa, shrd_count1, shrd_count0+1, "VISA 3.6.10");
+	// Rule 3.6.33
+	retval = viUnlock(vi);
+	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS_NESTED_SHARED, "VISA 3.6.33 VI_SUCCESS_NESTED_SHARED");
 
 	free(access_key);
 	free(requested_key);
@@ -292,7 +295,6 @@ int main()
 	// Rule 3.6.29
 	// Rule 3.6.31
 
-	// Rule 3.6.33
 	// Rule 3.6.35
 	// Rule 3.6.36
 	// Rule 3.6.37

@@ -848,13 +848,16 @@ ViStatus viUnlock(ViObject vi)
 		retval = vi_rsrc_dec_excl_lock_count(vip->rsrc);
 		if (retval != VI_SUCCESS)
 			return retval;
-		return VI_SUCCESS_NESTED_EXCLUSIVE;
+		if (excl_lock_count > 1)
+			return VI_SUCCESS_NESTED_EXCLUSIVE;
 	}
 	if (shared_lock_count > 0)
 	{
 		retval = vi_rsrc_dec_shared_lock_count(vip->rsrc);
 		if (retval != VI_SUCCESS)
 			return retval;
+		if (shared_lock_count > 1)
+			return VI_SUCCESS_NESTED_SHARED;
 	}
 	return VI_SUCCESS;
 }
