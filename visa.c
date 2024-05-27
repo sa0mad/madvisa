@@ -804,11 +804,16 @@ ViStatus viLock(ViObject vi, ViAccessMode lock_type, ViUInt32 timeout, ViConstKe
 		return VI_ERROR_INV_ACCESS_KEY;
 	if ((lock_type == VI_SHARED_LOCK) && (requested_key != NULL) && (is_locked == 0))
 		strncpy(access_key,requested_key,255);
+	if ((lock_type == VI_SHARED_LOCK) && (excl_lock_count > 0))
+		return VI_ERROR_RSRC_LOCKED;
+	// Lock possible, increase lock count
 	if (lock_type == VI_EXCLUSIVE_LOCK)
 	{
 		retval = vi_rsrc_inc_excl_lock_count(vip->rsrc);
 		if (retval != VI_SUCCESS)
 			return retval;
+		if (excl_lock_count > 0)
+			return VI_SUCCESS_NESTED_EXCLUSIVE;
 	}
 	if (lock_type == VI_SHARED_LOCK)
 	{
@@ -823,11 +828,32 @@ ViStatus viUnlock(ViObject vi)
 {
 	ViStatus retval;
 	vi_t * vip;
+	ViUInt16 excl_lock_count, shared_lock_count;
 
 	// Locate vi
 	retval = vi_locate_vi(vi, &vip);
 	if (retval != VI_SUCCESS)
 		return retval;
+	retval = vi_rsrc_get_excl_lock_count(vip->rsrc, &excl_lock_count);
+	if (retval != VI_SUCCESS)
+		return retval;
+	retval = vi_rsrc_get_shared_lock_count(vip->rsrc, &shared_lock_count);
+	if (retval != VI_SUCCESS)
+		return retval;
+	// Lock possible, increase lock count
+	if (excl_lock_count > 0)
+	{
+		retval = vi_rsrc_dec_excl_lock_count(vip->rsrc);
+		if (retval != VI_SUCCESS)
+			return retval;
+		return VI_SUCCESS_NESTED_EXCLUSIVE;
+	}
+	if (shared_lock_count > 0)
+	{
+		retval = vi_rsrc_dec_shared_lock_count(vip->rsrc);
+		if (retval != VI_SUCCESS)
+			return retval;
+	}
 	return VI_SUCCESS;
 }
 
