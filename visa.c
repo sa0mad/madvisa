@@ -17,6 +17,7 @@ struct vi_rsrc_s
 	// Resource Lock state
 	ViUInt16	excl_lock_count;
 	ViUInt16	shared_lock_count;
+	ViKeyId		access_key;
 	
 	// Resource Attributes
 	ViString	rsrc_name;
@@ -188,6 +189,7 @@ static ViStatus vi_rsrc_create(ViString rsrc_name)
 		return VI_ERROR_ALLOC;
 	rsrc->excl_lock_count = 0;
 	rsrc->shared_lock_count = 0;
+	rsrc->access_key = NULL;
 	rsrc->rsrc_name = rsrc_name;
 	rsrc->access_mode = VI_NO_LOCK;
 	rsrc->rsrc_class = "INSTR";
@@ -196,6 +198,7 @@ static ViStatus vi_rsrc_create(ViString rsrc_name)
 
 static ViStatus vi_rsrc_free(vi_rsrc * rsrc)
 {
+	//free(rsrc->access_key);
 	free(rsrc);
 	return VI_SUCCESS;
 }
@@ -307,6 +310,22 @@ static ViStatus vi_rsrc_dec_shared_lock_count(vi_rsrc * rsrc)
 	if (rsrc == NULL)
 		return VI_ERROR_INV_OBJECT;
 	rsrc->shared_lock_count--;
+	return VI_SUCCESS;
+}
+
+static ViStatus vi_rsrc_set_access_key(vi_rsrc * rsrc, ViKeyId access_key)
+{
+	if (rsrc == NULL)
+		return VI_ERROR_INV_OBJECT;
+	rsrc->access_key = access_key;
+	return VI_SUCCESS;
+}
+
+static ViStatus vi_rsrc_get_access_key(vi_rsrc * rsrc, ViKeyId * access_key)
+{
+	if (rsrc == NULL)
+		return VI_ERROR_INV_OBJECT;
+	*access_key = rsrc->access_key;
 	return VI_SUCCESS;
 }
 
@@ -757,7 +776,17 @@ ViStatus viStatusDesc(/*@unused@*/ ViObject vi, ViStatus status, ViString desc)
 {
 	if (status == VI_SUCCESS)
 	{
-		strcpy(desc, "Success");
+		strcpy(desc, "VI_SUCCESS");
+		return VI_SUCCESS;
+	}
+	if (status == VI_SUCCESS_NESTED_EXCLUSIVE)
+	{
+		strcpy(desc, "VI_SUCCESS_NESTED_EXCLUSIVE");
+		return VI_SUCCESS;
+	}
+	if (status == VI_SUCCESS_NESTED_SHARED)
+	{
+		strcpy(desc, "VI_SUCCESS_NESTED_SHARED");
 		return VI_SUCCESS;
 	}
 	*desc = (ViChar)0;
@@ -774,6 +803,7 @@ ViStatus viLock(ViObject vi, ViAccessMode lock_type, ViUInt32 timeout, ViConstKe
 	ViStatus retval;
 	vi_t * vip;
 	ViUInt16 excl_lock_count, shared_lock_count;
+	ViKeyId lock_key;
 	int	requested_key_length;
 	int	is_locked = 0;
 
@@ -794,18 +824,31 @@ ViStatus viLock(ViObject vi, ViAccessMode lock_type, ViUInt32 timeout, ViConstKe
 	retval = vi_rsrc_get_shared_lock_count(vip->rsrc, &shared_lock_count);
 	if (retval != VI_SUCCESS)
 		return retval;
+	retval = vi_rsrc_get_access_key(vip->rsrc, &lock_key);
+	if (retval != VI_SUCCESS)
+		return retval;
 	if ((lock_type == VI_EXCLUSIVE_LOCK) && (access_key != NULL))
-		*access_key = 0;
+		*access_key = (ViChar)0;
 	if ((lock_type == VI_SHARED_LOCK) && (requested_key != NULL))
-		requested_key_length = strlen(requested_key);
+		requested_key_length = (int)strlen(requested_key);
 	else
 		requested_key_length = 0;
 	if ((lock_type == VI_SHARED_LOCK) && (requested_key != NULL) && (requested_key_length >= 256))
 		return VI_ERROR_INV_ACCESS_KEY;
-	if ((lock_type == VI_SHARED_LOCK) && (requested_key != NULL) && (is_locked == 0))
-		strncpy(access_key,requested_key,255);
 	if ((lock_type == VI_SHARED_LOCK) && (excl_lock_count > 0))
 		return VI_ERROR_RSRC_LOCKED;
+	if ((lock_type == VI_SHARED_LOCK) && (shared_lock_count > 0) && (strcmp(access_key,lock_key) != 0))
+		return VI_ERROR_INV_ACCESS_KEY;
+	// Lock possible, copy key
+	if ((lock_type == VI_SHARED_LOCK) && (requested_key != NULL) && (is_locked == 0))
+		strncpy(access_key,requested_key,255);
+	// Lock possible, store key
+	if (lock_type == VI_SHARED_LOCK)
+	{
+		retval = vi_rsrc_set_access_key(vip->rsrc, access_key);
+		if (retval != VI_SUCCESS)
+			return retval;
+	}
 	// Lock possible, increase lock count
 	if (lock_type == VI_EXCLUSIVE_LOCK)
 	{
