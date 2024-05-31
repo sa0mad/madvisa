@@ -251,6 +251,8 @@ int main()
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
 	retval = viLock(vi,VI_SHARED_LOCK,0,requested_key,access_key);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS_NESTED_SHARED, "VISA 3.6.30 VI_SUCCESS_NESTED_SHARED");
+	// Rule 3.6.19
+	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS_NESTED_SHARED, "VISA 3.6.19 VI_SUCCESS_NESTED_SHARED");
 	// Rule 3.6.11
 	retval = viGetAttribute(vi,VI_ATTR_RSRC_SHRD_LOCK_COUNT,&shrd_count1);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
@@ -306,14 +308,13 @@ int main()
 	// Rule 3.3.1
 	// Rule 3.5.1
 	// Rule 3.6.1
+	// Rule 3.6.16
 
 	// Indirectly testable
 	// Rule 3.2.11
 
 	// Remaining rules to implement
 	// Rule 3.6.8
-	// Rule 3.6.16
-	// Rule 3.6.19
 	// Rule 3.6.20
 	// Rule 3.6.21
 	// Rule 3.6.22
