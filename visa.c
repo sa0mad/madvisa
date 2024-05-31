@@ -829,6 +829,17 @@ ViStatus viLock(ViObject vi, ViAccessMode lock_type, ViUInt32 timeout, ViConstKe
 		return retval;
 	if ((lock_type == VI_EXCLUSIVE_LOCK) && (access_key != NULL))
 		*access_key = (ViChar)0;
+	if ((lock_type == VI_SHARED_LOCK) && (access_key == NULL))
+		return VI_ERROR_ALLOC;
+	if ((lock_type == VI_SHARED_LOCK) && (requested_key == NULL))
+	{
+		retval = snprintf(access_key, 256, "%p", (void *)vi);
+		if (retval < 0)
+		{
+			free(access_key);
+			return VI_ERROR_ALLOC;
+		}
+	}
 	if ((lock_type == VI_SHARED_LOCK) && (requested_key != NULL))
 		requested_key_length = (int)strlen(requested_key);
 	else

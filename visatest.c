@@ -283,10 +283,6 @@ int main()
 	retval = viGetAttribute(vi,VI_ATTR_RSRC_SHRD_LOCK_COUNT,&shrd_count1);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
 	TB_TEST_EXPECT_M_UINT(visa, shrd_count1, shrd_count0-1, "VISA 3.6.35");
-
-	free(access_key);
-	free(access_key2);
-	free(requested_key);
 	
 	retval = viUnlock(0);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_ERROR_INV_SESSION, "VISA 3.6.3 VI_ERROR_INV_SESSION");
@@ -294,8 +290,15 @@ int main()
 	// Rule 3.6.12
 	retval = viLock(vi,VI_EXCLUSIVE_LOCK,0,VI_NULL,VI_NULL);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA 3.6.13 VI_SUCCESS");
-	retval = viLock(vi,VI_SHARED_LOCK,0,VI_NULL,VI_NULL);
+	access_key[0] = (ViChar)0;
+	retval = viLock(vi,VI_SHARED_LOCK,0,VI_NULL,access_key);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_ERROR_RSRC_LOCKED, "VISA 3.6.12 VI_ERROR_RSRC_LOCKED");
+	// Rule 3.6.15
+	TB_TEST_EXPECT_N_UCHAR(visa, access_key[0], (ViChar)0, "VISA 3.6.15");
+
+	free(access_key);
+	free(access_key2);
+	free(requested_key);
 
 	
 	// Rules not testable
@@ -308,13 +311,7 @@ int main()
 	// Rule 3.2.11
 
 	// Remaining rules to implement
-	// Rule 3.2.5
-	// Rule 3.2.6
-	// Rule 3.4.1
-	// Rule 3.4.1-a
-	// Rule 3.4.1-b
 	// Rule 3.6.8
-	// Rule 3.6.15
 	// Rule 3.6.16
 	// Rule 3.6.19
 	// Rule 3.6.20
@@ -331,7 +328,14 @@ int main()
 	// Rule 3.6.38
 	// Rule 3.6.39
 
+	// Awaits events
+	// Rule 3.2.5
+	// Rule 3.2.6
+	
 	// Awaits HiSLIP
+	// Rule 3.4.1
+	// Rule 3.4.1-a
+	// Rule 3.4.1-b
 	// Rule 3.6.4
 	// Rule 3.6.5
 	// Rule 3.6.6

@@ -25,6 +25,38 @@
 	} \
 	suite##_tb_tests++
 
+#define TB_TEST_EXPECT_M_CHAR(suite, val, expect, str)	\
+	if (val != expect) \
+	{ \
+		printf("%s:%u (%s) ERROR %s %i (expected %i)\n", __FILE__, __LINE__, __func__, str, val, expect); \
+		suite##_tb_fails++; \
+	} \
+	suite##_tb_tests++
+
+#define TB_TEST_EXPECT_N_CHAR(suite, val, expect, str)	\
+	if (val == expect) \
+	{ \
+		printf("%s:%u (%s) ERROR %s %i (expected other than %i)\n", __FILE__, __LINE__, __func__, str, val, expect); \
+		suite##_tb_fails++; \
+	} \
+	suite##_tb_tests++
+
+#define TB_TEST_EXPECT_M_UCHAR(suite, val, expect, str)	\
+	if (val != expect) \
+	{ \
+		printf("%s:%u (%s) ERROR %s %u (expected %u)\n", __FILE__, __LINE__, __func__, str, (unsigned int)val, (unsigned int)expect); \
+		suite##_tb_fails++; \
+	} \
+	suite##_tb_tests++
+
+#define TB_TEST_EXPECT_N_UCHAR(suite, val, expect, str)	\
+	if (val == expect) \
+	{ \
+		printf("%s:%u (%s) ERROR %s %u (expected other than %u)\n", __FILE__, __LINE__, __func__, str, (unsigned int)val, (unsigned int)expect); \
+		suite##_tb_fails++; \
+	} \
+	suite##_tb_tests++
+
 #define TB_TEST_EXPECT_M_INT(suite, val, expect, str)	\
 	if (val != expect) \
 	{ \
