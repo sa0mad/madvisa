@@ -86,8 +86,8 @@ ViStatus viStatusDesc		(ViObject vi, ViStatus status,
 				 ViChar _VI_FAR desc[]);
 ViStatus viTerminate		(ViObject vi, ViUInt16 degree, ViJobId jobId);
 ViStatus viLock			(ViSession vi, ViAccessMode lockType,
-				 ViUInt32 timeout, ViConstKeyId requestedKey,
-				 ViChar _VI_FAR accessKey[]);
+				 ViUInt32 timeout, /*@null@*/ViConstKeyId requestedKey,
+				 /*@null@*/ViChar _VI_FAR accessKey[]);
 ViStatus viUnlock		(ViSession vi);
 ViStatus viEnableEvent		(ViSession vi, ViEventType eventType,
 				 ViUInt16 mechanism, ViEventFilter context);
