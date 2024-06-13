@@ -12,7 +12,7 @@
 
 TB_VAR(visa);
 
-int test_print_retval(ViObject vi, ViStatus retval, ViStatus expected_retval)
+static void test_print_retval(ViObject vi, ViStatus retval, ViStatus expected_retval)
 {
 	char * vstr;
 
@@ -20,17 +20,17 @@ int test_print_retval(ViObject vi, ViStatus retval, ViStatus expected_retval)
 	{
 		vstr = (char *)malloc(sizeof(char)*256);
 		if (vstr == NULL)
-			return 0;
+			return;
 		retval = viStatusDesc(vi, retval, vstr);
 		if (retval != VI_SUCCESS)
 		{
 			free(vstr);
-			return 0;
+			return;
 		}
 		printf("%s\n", vstr);
 		free(vstr);
 	}
-	return 0;
+	return;
 }
 
 int main()
