@@ -198,7 +198,14 @@ int main()
 	requested_key2[1] = 'a';
 	requested_key2[2] = 'r';
 	requested_key2[3] = (ViChar)0;
+	for (i=4; i < 511; i++)
+	{
+		requested_key[i] = (ViChar)0;
+		requested_key2[i] = (ViChar)0;
+	}
 	access_key = (char *)malloc(sizeof(char)*512);
+	for (i=0; i < 511; i++)
+		access_key[i] = (ViChar)0;
 	retval = viLock(vi,VI_EXCLUSIVE_LOCK,0,VI_NULL,access_key);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS_NESTED_EXCLUSIVE, "VISA 3.6.14 VI_SUCCESS_NEXTED_EXCLUSIVE");
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS_NESTED_EXCLUSIVE, "VISA 3.6.28 VI_SUCCESS_NESTED_EXCLUSIVE");
