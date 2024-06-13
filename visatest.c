@@ -189,11 +189,20 @@ int main()
 	// Rule 3.6.14
 	// Rule 3.6.28
 	requested_key = (char *)malloc(sizeof(char)*512);
+	if (requested_key == NULL)
+	{
+		return -1;
+	}
 	requested_key[0] = 'f';
 	requested_key[1] = 'o';
 	requested_key[2] = 'o';
 	requested_key[3] = (ViChar)0;
 	requested_key2 = (char *)malloc(sizeof(char)*512);
+	if (requested_key2 == NULL)
+	{
+		free(requested_key);
+		return -1;
+	}
         requested_key2[0] = 'b';
 	requested_key2[1] = 'a';
 	requested_key2[2] = 'r';
@@ -204,6 +213,12 @@ int main()
 		requested_key2[i] = (ViChar)0;
 	}
 	access_key = (char *)malloc(sizeof(char)*512);
+	if (access_key == NULL)
+	{
+		free(requested_key2);
+		free(requested_key);
+		return -1;
+	}
 	for (i=0; i < 511; i++)
 		access_key[i] = (ViChar)0;
 	retval = viLock(vi,VI_EXCLUSIVE_LOCK,0,VI_NULL,access_key);
@@ -235,6 +250,13 @@ int main()
 	
 	// Rule 3.6.17
 	requested_key3 = (char *)malloc(sizeof(char)*512);
+	if (requested_key3 == NULL)
+	{
+		free(access_key);
+		free(requested_key2);
+		free(requested_key);
+		return -1;
+	}
 	for (i = 0; i < 256; i++)
 		requested_key3[i] = 'f';
 	requested_key3[256] = (ViChar)0;
