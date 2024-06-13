@@ -1,5 +1,6 @@
 #ifndef __TB_H
 #define __TB_H
+#include <string.h>
 
 #define TB_VAR(suite) static int suite##_tb_tests, suite##_tb_fails
 
@@ -131,6 +132,22 @@
 
 #define TB_TEST_EXPECT_N_PTR(suite, val, expect, str)	\
 	if (val == expect) \
+	{ \
+		printf("%s:%u (%s) ERROR %s %p (expected other than %p)\n", __FILE__, __LINE__, __func__, str, val, expect); \
+		suite##_tb_fails++; \
+	} \
+	suite##_tb_tests++
+
+#define TB_TEST_EXPECT_M_STR(suite, val, expect, str)	\
+	if (strcmp(val, expect) != 0)			\
+	{ \
+		printf("%s:%u (%s) ERROR %s %p (expected %p)\n", __FILE__, __LINE__, __func__, str, val, expect); \
+		suite##_tb_fails++; \
+	} \
+	suite##_tb_tests++
+
+#define TB_TEST_EXPECT_N_STR(suite, val, expect, str)	\
+	if (strcmp(val, expect) == 0)			\
 	{ \
 		printf("%s:%u (%s) ERROR %s %p (expected other than %p)\n", __FILE__, __LINE__, __func__, str, val, expect); \
 		suite##_tb_fails++; \
