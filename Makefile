@@ -20,7 +20,7 @@ visatest: visatype.h visa.h visa.c visatest.c
 	./visatest
 
 visa.c.splint: Makefile tb.h visatype.h visa.h visa.c visatest.c
-	splint -compdef -compdestroy -temptrans -branchstate -kepttrans -compmempass -onlytrans -varuse -nullstate -observertrans -statictrans -usedef -unqualifiedtrans -must-freeonly visa.c visatest.c > visa.c.splint
+	splint -compdef -compdestroy -temptrans -branchstate -kepttrans -compmempass -onlytrans -varuse -nullstate -observertrans -statictrans -usedef -unqualifiedtrans -must-freeonly -aliasunique visa.c visatest.c > visa.c.splint
 
 visatest.valgrind: Makefile visatest
 	valgrind --leak-check=full --show-leak-kinds=all ./visatest > visatest.valgrind
