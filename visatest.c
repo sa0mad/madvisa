@@ -12,6 +12,27 @@
 
 TB_VAR(visa);
 
+int test_print_retval(ViObject vi, ViStatus retval, ViStatus expected_retval)
+{
+	char * vstr;
+
+	if (retval != expected_retval)
+	{
+		vstr = (char *)malloc(sizeof(char)*256);
+		if (vstr == NULL)
+			return 0;
+		retval = viStatusDesc(vi, retval, vstr);
+		if (retval != VI_SUCCESS)
+		{
+			free(vstr);
+			return 0;
+		}
+		printf("%s\n", vstr);
+		free(vstr);
+	}
+	return 0;
+}
+
 int main()
 {
 	ViStatus	retval;
@@ -294,20 +315,7 @@ int main()
 	retval = viLock(vi,VI_SHARED_LOCK,0,requested_key,access_key);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_ERROR_INV_ACCESS_KEY, "VISA 3.6.31 VI_ERROR_INV_ACCESS_KEY");
 	
-	if (retval != VI_ERROR_INV_ACCESS_KEY)
-	{
-		vstr = (char *)malloc(sizeof(char)*256);
-		if (vstr == NULL)
-			return 0;
-		retval = viStatusDesc(vi, retval, vstr);
-		if (retval != VI_SUCCESS)
-		{
-			free(vstr);
-			return 0;
-		}
-		printf("%s\n", vstr);
-		free(vstr);
-	}
+	test_print_retval(vi, retval, VI_ERROR_INV_ACCESS_KEY);
 	
 	// Rule 3.6.33
 	// Rule 3.6.35
