@@ -834,11 +834,10 @@ ViStatus viLock(ViObject vi, ViAccessMode lock_type, ViUInt32 timeout, ViConstKe
 		return VI_ERROR_ALLOC;
 	if ((lock_type == VI_SHARED_LOCK) && (requested_key == NULL))
 	{
-		requested_key = (char *)malloc(sizeof(char)*512);
+		requested_key = access_key;
 		retval = snprintf(requested_key, 256, "%p", (void *)vip);
 		if (retval < 0)
 		{
-			free(requested_key);
 			return VI_ERROR_ALLOC;
 		}
 	}
