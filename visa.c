@@ -849,7 +849,7 @@ ViStatus viLock(ViObject vi, ViAccessMode lock_type, ViUInt32 timeout, ViConstKe
 		return VI_ERROR_INV_ACCESS_KEY;
 	if ((lock_type == VI_SHARED_LOCK) && (excl_lock_count > 0))
 		return VI_ERROR_RSRC_LOCKED;
-	if ((lock_type == VI_SHARED_LOCK) && (shared_lock_count > 0) && (strcmp(access_key,lock_key) != 0))
+	if ((lock_type == VI_SHARED_LOCK) && (shared_lock_count > 0) && (access_key != NULL) && (strcmp(access_key,lock_key) != 0))
 		return VI_ERROR_INV_ACCESS_KEY;
 	// Lock possible, copy key
 	if ((lock_type == VI_SHARED_LOCK) && (requested_key != NULL) && (is_locked == 0))
