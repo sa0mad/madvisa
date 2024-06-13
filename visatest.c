@@ -26,9 +26,10 @@ int main()
 	ViSession	vsession;
 	ViUInt32	vuint32;
 	ViUInt32	vuint64;
-	ViKeyId		access_key = NULL;
-	ViKeyId		access_key2 = NULL;
 	ViKeyId		requested_key = NULL;
+	ViKeyId		requested_key2 = NULL;
+	ViKeyId		requested_key3 = NULL;
+	ViKeyId		access_key = NULL;
 	int		i;
 	ViUInt16	excl_count0, excl_count1;
 	ViUInt16	shrd_count0, shrd_count1;
@@ -187,16 +188,17 @@ int main()
 	TB_TEST_EXPECT_M_UINT(visa, excl_count1, excl_count0+1, "VISA 3.6.10");
 	// Rule 3.6.14
 	// Rule 3.6.28
+	requested_key = (char *)malloc(sizeof(char)*512);
+	requested_key[0] = 'f';
+	requested_key[1] = 'o';
+	requested_key[2] = 'o';
+	requested_key[3] = (ViChar)0;
+	requested_key2 = (char *)malloc(sizeof(char)*512);
+        requested_key2[0] = 'b';
+	requested_key2[1] = 'a';
+	requested_key2[2] = 'r';
+	requested_key2[3] = (ViChar)0;
 	access_key = (char *)malloc(sizeof(char)*512);
-	access_key[0] = 'f';
-	access_key[1] = 'o';
-	access_key[2] = 'o';
-	access_key[3] = (ViChar)0;
-	access_key2 = (char *)malloc(sizeof(char)*512);
-	access_key2[0] = 'b';
-	access_key2[1] = 'a';
-	access_key2[2] = 'r';
-	access_key2[3] = (ViChar)0;
 	retval = viLock(vi,VI_EXCLUSIVE_LOCK,0,VI_NULL,access_key);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS_NESTED_EXCLUSIVE, "VISA 3.6.14 VI_SUCCESS_NEXTED_EXCLUSIVE");
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS_NESTED_EXCLUSIVE, "VISA 3.6.28 VI_SUCCESS_NESTED_EXCLUSIVE");
@@ -225,17 +227,17 @@ int main()
 	TB_TEST_EXPECT_M_UINT(visa, excl_count1, 0, "VISA 3.6.36");
 	
 	// Rule 3.6.17
-	requested_key = (char *)malloc(sizeof(char)*512);
+	requested_key3 = (char *)malloc(sizeof(char)*512);
 	for (i = 0; i < 256; i++)
-		requested_key[i] = 'f';
-	requested_key[256] = (ViChar)0;
-	retval = viLock(vi,VI_SHARED_LOCK,0,requested_key,access_key);
+		requested_key3[i] = 'f';
+	requested_key3[256] = (ViChar)0;
+	retval = viLock(vi,VI_SHARED_LOCK,0,requested_key3,access_key);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_ERROR_INV_ACCESS_KEY, "VISA 3.6.17 VI_ERROR_INV_ACCESS_KEY");
-	requested_key[255] = (ViChar)0;
+	requested_key3[255] = (ViChar)0;
 	// Rule 3.6.9
 	retval = viGetAttribute(vi,VI_ATTR_RSRC_SHRD_LOCK_COUNT,&shrd_count0);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
-	retval = viLock(vi,VI_SHARED_LOCK,0,requested_key,access_key);
+	retval = viLock(vi,VI_SHARED_LOCK,0,requested_key3,access_key);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA 3.6.17 VI_SUCCESS");
 	// Rule 3.6.11
 	retval = viGetAttribute(vi,VI_ATTR_RSRC_SHRD_LOCK_COUNT,&shrd_count1);
@@ -243,24 +245,26 @@ int main()
 	TB_TEST_EXPECT_M_UINT(visa, shrd_count1, shrd_count0+1, "VISA 3.6.10");
 	// Rule 3.6.18
 	for (i = 0; i < 256; i++)
-		if (access_key[i] != requested_key[i])
+		if (access_key[i] != requested_key3[i])
 			break;
 	TB_TEST_EXPECT_M_INT(visa, i, 256, "VISA 3.6.18");
 	// Rule 3.6.30
 	retval = viGetAttribute(vi,VI_ATTR_RSRC_SHRD_LOCK_COUNT,&shrd_count0);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
-	retval = viLock(vi,VI_SHARED_LOCK,0,requested_key,access_key);
+	retval = viLock(vi,VI_SHARED_LOCK,0,requested_key2,access_key);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS_NESTED_SHARED, "VISA 3.6.30 VI_SUCCESS_NESTED_SHARED");
 	// Rule 3.6.19
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS_NESTED_SHARED, "VISA 3.6.19 VI_SUCCESS_NESTED_SHARED");
+	// Rule 3.6.20
+	TB_TEST_EXPECT_M_STR(visa, access_key, requested_key2, "VISA 3.6.20");
 	// Rule 3.6.11
 	retval = viGetAttribute(vi,VI_ATTR_RSRC_SHRD_LOCK_COUNT,&shrd_count1);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
 	TB_TEST_EXPECT_M_UINT(visa, shrd_count1, shrd_count0+1, "VISA 3.6.10");
 	// Rule 3.6.31
-	retval = viLock(vi,VI_SHARED_LOCK,0,requested_key,access_key2);
+	retval = viLock(vi,VI_SHARED_LOCK,0,requested_key,access_key);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_ERROR_INV_ACCESS_KEY, "VISA 3.6.31 VI_ERROR_INV_ACCESS_KEY");
-	/*
+	
 	if (retval != VI_ERROR_INV_ACCESS_KEY)
 	{
 		vstr = (char *)malloc(sizeof(char)*256);
@@ -275,7 +279,7 @@ int main()
 		printf("%s\n", vstr);
 		free(vstr);
 	}
-	*/
+	
 	// Rule 3.6.33
 	// Rule 3.6.35
 	retval = viGetAttribute(vi,VI_ATTR_RSRC_SHRD_LOCK_COUNT,&shrd_count0);
@@ -298,10 +302,10 @@ int main()
 	// Rule 3.6.15
 	TB_TEST_EXPECT_N_UCHAR(visa, access_key[0], (ViChar)0, "VISA 3.6.15");
 
-	free(access_key);
-	free(access_key2);
 	free(requested_key);
-
+	free(requested_key2);
+	free(requested_key3);
+	free(access_key);
 	
 	// Rules not testable
 	// Rule 3.2.4
