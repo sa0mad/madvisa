@@ -855,9 +855,9 @@ ViStatus viLock(ViObject vi, ViAccessMode lock_type, ViUInt32 timeout, ViConstKe
 	if ((lock_type == VI_SHARED_LOCK) && (requested_key != NULL) && (is_locked == 0))
 		strncpy(access_key,requested_key,255);
 	// Lock possible, store key
-	if (lock_type == VI_SHARED_LOCK)
+	if (lock_type == VI_SHARED_LOCK && (access_key != NULL))
 	{
-		retval = vi_rsrc_set_lock_key(vip->rsrc, requested_key);
+		retval = vi_rsrc_set_lock_key(vip->rsrc, access_key);
 		if (retval != VI_SUCCESS)
 			return retval;
 	}
