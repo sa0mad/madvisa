@@ -17,7 +17,7 @@ struct vi_rsrc_s
 	// Resource Lock state
 	ViUInt16	excl_lock_count;
 	ViUInt16	shared_lock_count;
-	ViKeyId		access_key;
+	ViKeyId		lock_key;
 	
 	// Resource Attributes
 	ViString	rsrc_name;
@@ -189,7 +189,7 @@ static ViStatus vi_rsrc_create(ViString rsrc_name)
 		return VI_ERROR_ALLOC;
 	rsrc->excl_lock_count = 0;
 	rsrc->shared_lock_count = 0;
-	rsrc->access_key = NULL;
+	rsrc->lock_key = NULL;
 	rsrc->rsrc_name = rsrc_name;
 	rsrc->access_mode = VI_NO_LOCK;
 	rsrc->rsrc_class = "INSTR";
@@ -313,19 +313,19 @@ static ViStatus vi_rsrc_dec_shared_lock_count(vi_rsrc * rsrc)
 	return VI_SUCCESS;
 }
 
-static ViStatus vi_rsrc_set_access_key(vi_rsrc * rsrc, ViKeyId access_key)
+static ViStatus vi_rsrc_set_lock_key(vi_rsrc * rsrc, ViKeyId requested_key)
 {
 	if (rsrc == NULL)
 		return VI_ERROR_INV_OBJECT;
-	rsrc->access_key = access_key;
+	rsrc->lock_key = requested_key;
 	return VI_SUCCESS;
 }
 
-static ViStatus vi_rsrc_get_access_key(vi_rsrc * rsrc, ViKeyId * access_key)
+static ViStatus vi_rsrc_get_lock_key(vi_rsrc * rsrc, ViKeyId * lock_key)
 {
 	if (rsrc == NULL)
 		return VI_ERROR_INV_OBJECT;
-	*access_key = rsrc->access_key;
+	*lock_key = rsrc->lock_key;
 	return VI_SUCCESS;
 }
 
@@ -824,7 +824,7 @@ ViStatus viLock(ViObject vi, ViAccessMode lock_type, ViUInt32 timeout, ViConstKe
 	retval = vi_rsrc_get_shared_lock_count(vip->rsrc, &shared_lock_count);
 	if (retval != VI_SUCCESS)
 		return retval;
-	retval = vi_rsrc_get_access_key(vip->rsrc, &lock_key);
+	retval = vi_rsrc_get_lock_key(vip->rsrc, &lock_key);
 	if (retval != VI_SUCCESS)
 		return retval;
 	if ((lock_type == VI_EXCLUSIVE_LOCK) && (access_key != NULL))
@@ -856,7 +856,7 @@ ViStatus viLock(ViObject vi, ViAccessMode lock_type, ViUInt32 timeout, ViConstKe
 	// Lock possible, store key
 	if (lock_type == VI_SHARED_LOCK)
 	{
-		retval = vi_rsrc_set_access_key(vip->rsrc, access_key);
+		retval = vi_rsrc_set_lock_key(vip->rsrc, requested_key);
 		if (retval != VI_SUCCESS)
 			return retval;
 	}
