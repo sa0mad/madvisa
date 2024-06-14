@@ -54,6 +54,7 @@ int main()
 	int		i;
 	ViUInt16	excl_count0, excl_count1;
 	ViUInt16	shrd_count0, shrd_count1;
+	ViAccessMode	access_mode;
 
 	TB_VAR_RESET(visa);
 
@@ -207,6 +208,10 @@ int main()
 	retval = viGetAttribute(vi,VI_ATTR_RSRC_EXCL_LOCK_COUNT,&excl_count1);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
 	TB_TEST_EXPECT_M_UINT(visa, excl_count1, excl_count0+1, "VISA 3.6.10");
+	// Rule 3.6.24
+	retval = viGetAttribute(vi,VI_ATTR_RSRC_LOCK_STATE,&access_mode);
+	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
+	TB_TEST_EXPECT_M_LUINT(visa, access_mode, (long unsigned int)VI_EXCLUSIVE_LOCK, "VISA 3.6.24");
 	// Rule 3.6.14
 	// Rule 3.6.28
 	requested_key = (char *)malloc(sizeof(char)*512);
@@ -269,6 +274,10 @@ int main()
 	TB_TEST_EXPECT_M_UINT(visa, excl_count1, excl_count0-1, "VISA 3.6.35");
 	TB_TEST_EXPECT_M_UINT(visa, excl_count1, 0, "VISA 3.6.36");
 	
+	// Rule 3.6.25
+	retval = viGetAttribute(vi,VI_ATTR_RSRC_LOCK_STATE,&access_mode);
+	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
+	TB_TEST_EXPECT_M_LUINT(visa, access_mode, (long unsigned int)VI_NO_LOCK, "VISA 3.6.25");
 	// Rule 3.6.17
 	requested_key3 = (char *)malloc(sizeof(char)*512);
 	if (requested_key3 == NULL)
@@ -289,6 +298,10 @@ int main()
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
 	retval = viLock(vi,VI_SHARED_LOCK,0,requested_key3,access_key);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA 3.6.17 VI_SUCCESS");
+	// Rule 3.6.25
+	retval = viGetAttribute(vi,VI_ATTR_RSRC_LOCK_STATE,&access_mode);
+	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
+	TB_TEST_EXPECT_M_LUINT(visa, access_mode, (long unsigned int)VI_SHARED_LOCK, "VISA 3.6.25");
 	// Rule 3.6.11
 	retval = viGetAttribute(vi,VI_ATTR_RSRC_SHRD_LOCK_COUNT,&shrd_count1);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
@@ -360,8 +373,6 @@ int main()
 	// Rule 3.6.21
 	// Rule 3.6.22
 	// Rule 3.6.23
-	// Rule 3.6.24
-	// Rule 3.6.25
 	// Rule 3.6.26
 	// Rule 3.6.29
 

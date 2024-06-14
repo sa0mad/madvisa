@@ -211,6 +211,14 @@ static ViStatus vi_rsrc_get_impl_version(vi_rsrc * rsrc, ViVersion * version)
 	return VI_SUCCESS;
 }
 
+static ViStatus vi_rsrc_set_lock_state(vi_rsrc * rsrc, ViAccessMode lock_state)
+{
+	if (rsrc == NULL)
+		return VI_ERROR_INV_OBJECT;
+	rsrc->access_mode = lock_state;
+	return VI_SUCCESS;
+}
+
 static ViStatus vi_rsrc_get_lock_state(vi_rsrc * rsrc, ViAccessMode * lock_state)
 {
 	if (rsrc == NULL)
@@ -867,12 +875,18 @@ ViStatus viLock(ViObject vi, ViAccessMode lock_type, ViUInt32 timeout, ViConstKe
 		retval = vi_rsrc_inc_excl_lock_count(vip->rsrc);
 		if (retval != VI_SUCCESS)
 			return retval;
+		retval = vi_rsrc_set_lock_state(vip->rsrc, VI_EXCLUSIVE_LOCK);
+		if (retval != VI_SUCCESS)
+			return retval;
 		if (excl_lock_count > 0)
 			return VI_SUCCESS_NESTED_EXCLUSIVE;
 	}
 	if (lock_type == VI_SHARED_LOCK)
 	{
 		retval = vi_rsrc_inc_shared_lock_count(vip->rsrc);
+		if (retval != VI_SUCCESS)
+			return retval;
+		retval = vi_rsrc_set_lock_state(vip->rsrc, VI_SHARED_LOCK);
 		if (retval != VI_SUCCESS)
 			return retval;
 		if (shared_lock_count > 0)
@@ -903,7 +917,8 @@ ViStatus viUnlock(ViObject vi)
 		retval = vi_rsrc_dec_excl_lock_count(vip->rsrc);
 		if (retval != VI_SUCCESS)
 			return retval;
-		if (excl_lock_count > 1)
+		excl_lock_count--;
+		if (excl_lock_count > 0)
 			return VI_SUCCESS_NESTED_EXCLUSIVE;
 	}
 	if (shared_lock_count > 0)
@@ -911,8 +926,15 @@ ViStatus viUnlock(ViObject vi)
 		retval = vi_rsrc_dec_shared_lock_count(vip->rsrc);
 		if (retval != VI_SUCCESS)
 			return retval;
-		if (shared_lock_count > 1)
+		shared_lock_count--;
+		if (shared_lock_count > 0)
 			return VI_SUCCESS_NESTED_SHARED;
+	}
+	if ((excl_lock_count == 0) && (shared_lock_count == 0))
+	{
+		retval = vi_rsrc_set_lock_state(vip->rsrc, VI_NO_LOCK);
+		if (retval != VI_SUCCESS)
+			return retval;
 	}
 	return VI_SUCCESS;
 }
