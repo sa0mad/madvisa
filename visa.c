@@ -911,7 +911,9 @@ ViStatus viUnlock(ViObject vi)
 	retval = vi_rsrc_get_shared_lock_count(vip->rsrc, &shared_lock_count);
 	if (retval != VI_SUCCESS)
 		return retval;
-	// Lock possible, increase lock count
+	if ((excl_lock_count == 0) && (shared_lock_count == 0))
+		return VI_ERROR_SESN_NLOCKED;
+	// Unlock possible, decrease lock count
 	if (excl_lock_count > 0)
 	{
 		retval = vi_rsrc_dec_excl_lock_count(vip->rsrc);

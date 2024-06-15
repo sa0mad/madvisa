@@ -282,6 +282,10 @@ int main()
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
 	TB_TEST_EXPECT_M_UINT(visa, excl_count1, excl_count0-1, "VISA 3.6.35");
 	TB_TEST_EXPECT_M_UINT(visa, excl_count1, 0, "VISA 3.6.36");
+
+	// Rule 3.6.38
+	retval = viUnlock(vi);
+	TB_TEST_EXPECT_M_LINT(visa, retval, VI_ERROR_SESN_NLOCKED, "VISA 3.6.38");
 	
 	// Rule 3.6.25
 	retval = viGetAttribute(vi,VI_ATTR_RSRC_LOCK_STATE,&access_mode);
@@ -389,7 +393,6 @@ int main()
 
 	// Rule 3.6.36
 	// Rule 3.6.37
-	// Rule 3.6.38
 	// Rule 3.6.39
 
 	// Awaits events
