@@ -294,10 +294,12 @@ int main()
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_ERROR_INV_ACCESS_KEY, "VISA 3.6.17 VI_ERROR_INV_ACCESS_KEY");
 	requested_key3[255] = (ViChar)0;
 	// Rule 3.6.9
+	// Rule 3.6.29
 	retval = viGetAttribute(vi,VI_ATTR_RSRC_SHRD_LOCK_COUNT,&shrd_count0);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
 	retval = viLock(vi,VI_SHARED_LOCK,0,requested_key3,access_key);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA 3.6.17 VI_SUCCESS");
+	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA 3.6.29 VI_SUCCESS");
 	// Rule 3.6.25
 	retval = viGetAttribute(vi,VI_ATTR_RSRC_LOCK_STATE,&access_mode);
 	TB_TEST_EXPECT_M_LINT(visa, retval, VI_SUCCESS, "VISA Rule 3.6.9");
@@ -374,7 +376,6 @@ int main()
 	// Rule 3.6.22
 	// Rule 3.6.23
 	// Rule 3.6.26
-	// Rule 3.6.29
 
 	// Rule 3.6.36
 	// Rule 3.6.37
