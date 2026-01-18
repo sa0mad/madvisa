@@ -1,5 +1,6 @@
 #ifndef __TB_H
 #define __TB_H
+#include <math.h>
 #include <string.h>
 
 #define TB_VAR(suite) static int suite##_tb_tests, suite##_tb_fails
@@ -118,6 +119,54 @@
 	if (val == expect) \
 	{ \
 		printf("%s:%u (%s) ERROR %s %lu (expected other than %lu)\n", __FILE__, __LINE__, __func__, str, val, expect); \
+		suite##_tb_fails++; \
+	} \
+	suite##_tb_tests++
+
+#define TB_TEST_EXPECT_M_DBL(suite, val, expect, str)	\
+	if (val != expect) \
+	{ \
+		printf("%s:%u (%s) ERROR %s %f (expected %f)\n", __FILE__, __LINE__, __func__, str, val, expect); \
+		suite##_tb_fails++; \
+	} \
+	suite##_tb_tests++
+
+#define TB_TEST_EXPECT_N_DBL(suite, val, expect, str)	\
+	if (val == expect) \
+	{ \
+		printf("%s:%u (%s) ERROR %s %f (expected other than %f)\n", __FILE__, __LINE__, __func__, str, val, expect); \
+		suite##_tb_fails++; \
+	} \
+	suite##_tb_tests++
+
+#define TB_TEST_EXPECT_M_DBL_RE(suite, val, expect, err, str)	\
+	if (fabs(val - expect) > (val*err))			\
+	{ \
+		printf("%s:%u (%s) ERROR %s %f (expected %f)\n", __FILE__, __LINE__, __func__, str, val, expect); \
+		suite##_tb_fails++; \
+	} \
+	suite##_tb_tests++
+
+#define TB_TEST_EXPECT_N_DBL_RE(suite, val, expect, str)	\
+	if (fabs(val - expect) <= (val*err))			\
+	{ \
+		printf("%s:%u (%s) ERROR %s %f (expected other than %f)\n", __FILE__, __LINE__, __func__, str, val, expect); \
+		suite##_tb_fails++; \
+	} \
+	suite##_tb_tests++
+
+#define TB_TEST_EXPECT_M_DBLNAN(suite, val, str)	\
+	if (isnan(val) != 1)				\
+	{ \
+		printf("%s:%u (%s) ERROR %s %f (expected %f)\n", __FILE__, __LINE__, __func__, str, val, NAN); \
+		suite##_tb_fails++; \
+	} \
+	suite##_tb_tests++
+
+#define TB_TEST_EXPECT_N_DBLNAN(suite, val, str)	\
+	if (isnan(val) == 1)			\
+	{ \
+		printf("%s:%u (%s) ERROR %s %f (expected other than %f)\n", __FILE__, __LINE__, __func__, str, val, NAN); \
 		suite##_tb_fails++; \
 	} \
 	suite##_tb_tests++
